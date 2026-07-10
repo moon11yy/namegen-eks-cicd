@@ -29,13 +29,25 @@ spec:
             - name: MONGO_INITDB_DATABASE
               value: namegen
 
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_USERNAME
+
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_PASSWORD
+
           volumeMounts:
             - name: mongodb-data
               mountPath: /data/db
 
             - name: mongodb-init
-              mountPath: /docker-entrypoint-initdb.d/mongo-init.js
-              subPath: mongo-init.js
+              mountPath: /docker-entrypoint-initdb.d/mongo-init.sh
+              subPath: mongo-init.sh
               readOnly: true
 
           readinessProbe:
@@ -50,10 +62,18 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
 
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+
       volumes:
         - name: mongodb-init
           configMap:
             name: mongodb-init
+            defaultMode: 0755
 
   volumeClaimTemplates:
     - metadata:

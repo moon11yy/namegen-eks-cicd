@@ -4,16 +4,19 @@ metadata:
   name: mongodb-init
   namespace: namegen
 data:
-  mongo-init.js: |
-    db = db.getSiblingDB('namegen');
+  mongo-init.sh: |
+    #!/bin/bash
+    set -e
 
+    mongo namegen <<MONGOEOF
     db.createUser({
-      user: 'genuser',
-      pwd: 'password',
+      user: "${MONGO_USERNAME}",
+      pwd: "${MONGO_PASSWORD}",
       roles: [
         {
-          role: 'readWrite',
-          db: 'namegen'
+          role: "readWrite",
+          db: "namegen"
         }
       ]
     });
+    MONGOEOF
