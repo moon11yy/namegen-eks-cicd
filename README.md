@@ -12,7 +12,7 @@ The infrastructure includes Amazon EKS Auto Mode, Amazon ECR, GitHub Actions, a 
 
 ## Architecture
 
-![Architecture](diagram/architecture.png)
+![Architecture](diagram/diagram.png)
 
 ---
 
