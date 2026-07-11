@@ -1,45 +1,219 @@
-# random-name-gen-app
-A demonstration project that has an API backend that binds to an instance of a MongoDB database and an HTML front end, all running from the same code base. The behavior of the UI is that it generates and stores a random name according to a series of button clicks.
+# Random Name Generator and Saver on Amazon EKS
 
+## Project Overview
 
-## Get up and running
+This project demonstrates a complete CI/CD pipeline for deploying a containerized Node.js application to Amazon Elastic Kubernetes Service (EKS).
 
-`Step 1:` Get the code:
+The application generates random names, stores them in a MongoDB database, and displays all saved names through a web interface.
 
-`git clone https://github.com/reselbob/random-name-gen-app.git`
-
----
-
-`Step 2:` Add an entry to `.env`:
-
-`MONGODB_URL=<connection_string_url_to_mongodb_server>`
+The infrastructure includes Amazon EKS Auto Mode, Amazon ECR, GitHub Actions, a Network Load Balancer (NLB), MongoDB StatefulSet with persistent storage, and Kubernetes manifests.
 
 ---
 
-`Step 3:` Install the dependencies:
+## Architecture
 
-`npm install`
-
----
-
-`Step 4:` Start the server:
-
-`node server.js`
-
-By default, the app runs on port `8080`
-
-To change the port on which the web server is listening, add the following to the `.env` file in the root of the project's working directory:
-
-`SERVER_PORT=<port_number>`
-
-WHERE
-
-`<port_number>` is the number of the port for the web server.
+![Architecture](diagram/architecture.png)
 
 ---
 
-`Step 5:` Access the front-end web page:
+## Technologies Used
 
-`http://localhost:8080/`
+- Amazon Web Services (AWS)
+- Amazon EKS (Auto Mode)
+- Amazon ECR
+- Amazon EBS
+- Network Load Balancer (NLB)
+- Kubernetes
+- Docker
+- GitHub Actions
+- Node.js
+- MongoDB 3.6
+- eksctl
 
-![1 40-05](https://user-images.githubusercontent.com/1110569/192336149-68a1e69d-9689-477d-9047-8e3899b933c3.png)
+---
+
+## Project Structure
+
+```
+.
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+│
+├── diagram/
+│   ├── architecture.drawio
+│   └── architecture.png
+│
+├── eksctl/
+│   └── cluster.yaml
+│
+├── k8s/
+│   ├── namespace.yaml
+│   ├── storageclass.yaml
+│   ├── mongodb-secret.yaml
+│   ├── mongodb-service.yaml
+│   ├── mongodb-init-configmap.yaml
+│   ├── mongodb-statefulset.yaml
+│   ├── app-deployment.yaml
+│   └── app-service.yaml
+│
+├── screenshots/
+│
+├── Dockerfile
+├── package.json
+├── README.md
+└── ...
+```
+
+---
+
+## Infrastructure
+
+The Kubernetes cluster was provisioned using **eksctl** with **Amazon EKS Auto Mode**.
+
+Resources deployed:
+
+- Amazon EKS Cluster
+- Amazon ECR Repository
+- Amazon EBS Persistent Volume
+- Kubernetes Namespace
+- MongoDB StatefulSet
+- Node.js Deployment
+- Kubernetes Services
+- Network Load Balancer
+
+---
+
+## Kubernetes Resources
+
+### Application
+
+- Deployment
+- 2 Replicas
+- LoadBalancer Service
+
+### Database
+
+- MongoDB 3.6
+- StatefulSet
+- Persistent Volume Claim
+- Amazon EBS Storage
+
+---
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions for Continuous Integration and Continuous Deployment.
+
+Pipeline workflow:
+
+1. Developer pushes code to GitHub.
+2. GitHub Actions starts automatically.
+3. Docker image is built.
+4. Image is pushed to Amazon ECR.
+5. kubectl connects to Amazon EKS.
+6. Deployment image is updated.
+7. Kubernetes performs a rolling update.
+
+The workflow authenticates to AWS using GitHub OIDC without storing long-term AWS credentials.
+
+---
+
+## Deployment
+
+Provision the cluster:
+
+```bash
+eksctl create cluster -f eksctl/cluster.yaml
+```
+
+Deploy Kubernetes resources:
+
+```bash
+kubectl apply -f k8s/
+```
+
+Verify resources:
+
+```bash
+kubectl get pods -n namegen
+kubectl get svc -n namegen
+kubectl get pvc -n namegen
+```
+
+---
+
+## Screenshots
+
+### Amazon EKS
+
+![EKS](screenshots/01-eks-cluster-overview.png)
+
+### Kubernetes Nodes
+
+![Nodes](screenshots/02-kubernetes-nodes.png)
+
+### Running Pods
+
+![Pods](screenshots/03-kubernetes-pods.png)
+
+### Kubernetes Services
+
+![Services](screenshots/04-kubernetes-services.png)
+
+### Persistent Volumes
+
+![PVC](screenshots/05-persistent-volumes.png)
+
+### Amazon EBS
+
+![EBS](screenshots/06-amazon-ebs-volume.png)
+
+### Network Load Balancer
+
+![NLB](screenshots/07-network-load-balancer.png)
+
+### Amazon ECR
+
+![ECR](screenshots/08-amazon-ecr-repository.png)
+
+### GitHub Actions Workflow
+
+![Workflow](screenshots/09-github-actions-workflow.png)
+
+### Successful Deployment
+
+![Success](screenshots/10-github-actions-success.png)
+
+### Running Application
+
+![Application](screenshots/11-running-application.png)
+
+---
+
+## Features
+
+- Fully containerized application
+- Automated CI/CD pipeline
+- Kubernetes rolling updates
+- Persistent MongoDB storage
+- Network Load Balancer exposure
+- GitHub OIDC authentication
+- Infrastructure deployed on Amazon EKS Auto Mode
+
+---
+
+## Result
+
+The application is automatically built and deployed after every push to the **main** branch.
+
+The deployment includes:
+
+- Amazon EKS
+- Amazon ECR
+- Amazon EBS
+- MongoDB StatefulSet
+- Kubernetes LoadBalancer Service
+- GitHub Actions CI/CD
+
+The application is accessible through an AWS Network Load Balancer and stores data persistently using Amazon EBS.
